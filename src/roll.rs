@@ -1,31 +1,39 @@
 pub(crate) mod parser {
     use rand::Rng;
+    use std::convert::TryInto;
+    use std::ops::{Index, Deref};
+    use std::borrow::Borrow;
 
     pub fn parse(args: &[String]) {
         print!("input {:?}\n", args);
         let split_args = prepare_args(args);
-
         print!("split {:?}\n", split_args);
-        let mut tokens : Vec<Token> = parse_tokens(&split_args);
 
-        print!("token count {:?}\n", tokens.len());
+        let mut tokens : Vec<Token> = parse_tokens(&split_args);
+        print!("token count {:?}\n", tokens);
+
+        let roll_results = roll(&mut tokens);
+        print!("roll results {:?}\n", roll_results);
+
+
     }
 
     fn prepare_args(args: &[String]) -> Vec<String> {
         let mut joined_args = "".to_string();
-        joined_args = joined_args.replace(" ", "");
 
         for (i, entry) in args.iter().enumerate() {
             if i > 0 {
                 joined_args.push_str(&entry);
             }
         }
-
-        joined_args = joined_args.replace("+", " + ");
-        joined_args = joined_args.replace("*", " * ");
-        joined_args = joined_args.replace(")", " ) ");
-        joined_args = joined_args.replace("(", " ( ");
-        joined_args = joined_args.to_lowercase();
+        joined_args = joined_args.replace(" ", "")
+            .replace("+", " + ")
+            .replace("-", " - ")
+            .replace("*", " * ")
+            .replace("/", " / ")
+            .replace(")", " ) ")
+            .replace("(", " ( ")
+            .to_lowercase();
 
         let split: Vec<&str> = joined_args.as_str().split_whitespace().collect();
         let result: Vec<String> = split.iter().map(|s| s.to_string()).collect();
@@ -58,7 +66,6 @@ pub(crate) mod parser {
                 _ => {
                     let _ = match entry.parse::<u64>() {
                         Ok(i) => {
-                            print!("{}",i);
                             tokens.push(Token::number(i))
                         },
                         Err(_e) => {
@@ -74,6 +81,33 @@ pub(crate) mod parser {
         return tokens;
     }
 
+
+
+    fn roll(tokens:&mut Vec<Token>) -> Vec<Token> {
+        let mut result: Vec<Token> = Vec::new();
+        let mut rng = rand::thread_rng();
+        for entry in tokens {
+            if let Token::roll((count,dice_size)) = entry {
+                let mut random: u64 = 0;
+                let mut rolls: Vec<u64> = Vec::new();
+                for i in 0..*count {
+                    random = rng.gen_range(0..*dice_size) + 1;
+                    rolls.push(random);
+                }
+
+                let sum = rolls.iter().sum();
+
+                print!("{}: {:?} -> = {}\n", format!("{}d{}", count.to_string(), dice_size.to_string()), rolls, sum);
+                result.push(Token::number(sum));
+            } else {
+                result.push(*entry)
+            }
+        }
+
+        return result;
+    }
+
+    #[derive(Debug, PartialEq, Copy, Clone)]
     enum Token {
         number(u64),
         roll((u64,u64)),
@@ -84,22 +118,4 @@ pub(crate) mod parser {
         braces_open,
         braces_close
     }
-
-    fn roll(tokens: Vec<Token>) -> Vec<(String, u64)> {
-        let mut result: Vec<(String, u64)> = Vec::new();
-        let mut rng = rand::thread_rng();
-        for entry in tokens {
-            if entry == Token::roll {
-                let mut r: u64 =0;
-                for i in 0..entry.0 {
-                    r += rng.gen_range(1..entry.1);
-                    print!("{}",r)
-                }
-
-            }
-        }
-
-        return result;
-    }
-
 }
