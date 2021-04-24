@@ -13,7 +13,7 @@ pub(crate) mod parser {
         print!("token count {:?}\n", tokens);
 
         let roll_results = roll(&mut tokens);
-        print!("roll results {:?}\n", roll_results);
+        print!("roll results {:?}\n", tokens);
     }
 
     fn prepare_args(args: &[String]) -> Vec<String> {
@@ -79,8 +79,7 @@ pub(crate) mod parser {
         return tokens;
     }
 
-    fn roll(tokens:&mut Vec<Token>) -> Vec<Token> {
-        let mut result: Vec<Token> = Vec::new();
+    fn roll(tokens:&mut Vec<Token>) {
         let mut rng = rand::thread_rng();
         for entry in tokens {
             if let Token::roll((count,dice_size)) = entry {
@@ -92,15 +91,10 @@ pub(crate) mod parser {
                 }
 
                 let sum = rolls.iter().sum();
-
-                print!("{}: {:?} -> = {}\n", format!("{}d{}", count.to_string(), dice_size.to_string()), rolls, sum);
-                result.push(Token::number(sum));
-            } else {
-                result.push(*entry)
+                print!("{}: {:?}  = {}\n", format!("{}d{}", count.to_string(), dice_size.to_string()), rolls, sum);
+                *entry = Token::number(sum);
             }
         }
-
-        return result;
     }
 
     #[derive(Debug, PartialEq, Copy, Clone)]
