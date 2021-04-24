@@ -14,8 +14,6 @@ pub(crate) mod parser {
 
         let roll_results = roll(&mut tokens);
         print!("roll results {:?}\n", roll_results);
-
-
     }
 
     fn prepare_args(args: &[String]) -> Vec<String> {
@@ -80,8 +78,6 @@ pub(crate) mod parser {
 
         return tokens;
     }
-
-
 
     fn roll(tokens:&mut Vec<Token>) -> Vec<Token> {
         let mut result: Vec<Token> = Vec::new();
