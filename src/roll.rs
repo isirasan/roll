@@ -44,16 +44,16 @@ pub(crate) mod parser {
         for (i, entry) in args_list.iter().enumerate() {
             match entry {
                 x if x == "+" => {
-                    tokens.push(Token::operator_add)
+                    tokens.push(Token::operator('+'))
                 }
                 x if x == "-" => {
-                    tokens.push(Token::opperator_sub)
+                    tokens.push(Token::operator('-'))
                 }
                 x if x == "*" => {
-                    tokens.push(Token::opperator_mul)
+                    tokens.push(Token::operator('*'))
                 }
                 x if x == "/" => {
-                    tokens.push(Token::opperator_div)
+                    tokens.push(Token::operator('/'))
                 }
                 x if x == "(" => {
                     tokens.push(Token::braces_open)
@@ -101,10 +101,7 @@ pub(crate) mod parser {
     enum Token {
         number(u64),
         roll((u64,u64)),
-        operator_add,
-        opperator_mul,
-        opperator_sub,
-        opperator_div,
+        operator(char),
         braces_open,
         braces_close
     }
