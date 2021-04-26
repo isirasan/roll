@@ -110,7 +110,7 @@ pub(crate) mod parser {
             if let Token::number(num) = entry {
                 output.push(*entry)
             } else if let Token::operator(op) = entry {
-                while let Some(Token::operator(c)) =  stack.last() {
+                while let Some(Token::operator(c)) =  stack.first() {
                     if compare_opertor_prevalenz(*op,*c) {
                         let stack_element = stack.pop();
                         match stack_element {
@@ -127,19 +127,19 @@ pub(crate) mod parser {
             } else if let Token::braces_open = entry {
                 stack.push(*entry)
             } else if let Token::braces_close = entry {
-                while stack.last() != Some(&Token::braces_open) {
+                while stack.len() > 0 {
                     let stack_element = stack.pop();
                     match stack_element {
                         Some(x) => {
-                            output.push(x);
+                            if x == Token::braces_open {
+                                break;
+                            } else {
+                                output.push(x);
+                            }
                         }
                         None => {
-                            panic!()
+                            break;
                         }
-                    }
-
-                    if  stack.last() == Some(&Token::braces_open) {
-                        stack.pop();
                     }
                 }
             }
@@ -152,10 +152,11 @@ pub(crate) mod parser {
                     output.push(x);
                 }
                 None => {
-                    panic!()
+                    break;
                 }
             }
         }
+
         print!("{:?}\n",output);
     }
 
