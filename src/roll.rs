@@ -5,13 +5,13 @@ pub(crate) mod parser {
 
     pub fn parse(args: &[String]) {
 
-        panic::set_hook(Box::new(|panic_info| {
-            if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
-                println!("{:?}", s);
-            } else {
-                println!("panic occurred");
-            }
-        }));
+        // panic::set_hook(Box::new(|panic_info| {
+        //     if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+        //         println!("{:?}", s);
+        //     } else {
+        //         println!("panic occurred");
+        //     }
+        // }));
 
         let split_args = prepare_args(args);
 
@@ -42,8 +42,11 @@ pub(crate) mod parser {
             .replace("-", " - ")
             .replace("*", " * ")
             .replace("/", " / ")
+            .replace("c", " c ")
+            .replace("f", " f ")
             .replace(")", " ) ")
-            .replace("(", " ( ");
+            .replace("(", " ( ")
+            .replace(" d", " 1d");
 
 
         let split: Vec<&str> = joined_args.as_str().split_whitespace().collect();
@@ -67,6 +70,12 @@ pub(crate) mod parser {
                 }
                 x if x == "/" => {
                     tokens.push(Token::Operator('/'))
+                }
+                x if x == "c" => {
+                    tokens.push(Token::Operator('c'))
+                }
+                x if x == "f" => {
+                    tokens.push(Token::Operator('f'))
                 }
                 x if x == "(" => {
                     tokens.push(Token::BracesOpen)
@@ -209,6 +218,18 @@ pub(crate) mod parser {
                         let result =  ((left as f64) / (right as f64)).round() as i64;
                         stack.push(Token::Number(result));
                     }
+                    'c' => {
+                        let left = get_stack_number(&mut stack);
+                        let right = get_stack_number(&mut stack);
+                        let result =  ((left as f64) / (right as f64)).ceil() as i64;
+                        stack.push(Token::Number(result));
+                    }
+                    'f' => {
+                        let left = get_stack_number(&mut stack);
+                        let right = get_stack_number(&mut stack);
+                        let result =  ((left as f64) / (right as f64)).floor() as i64;
+                        stack.push(Token::Number(result));
+                    }
                     _ => {}
 
 
@@ -253,7 +274,8 @@ pub(crate) mod parser {
         map.insert('-', 1);
         map.insert('*', 2);
         map.insert('/', 2);
-
+        map.insert('c', 2);
+        map.insert('f', 2);
         return map[&a] <= map[&b];
     }
 
