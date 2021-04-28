@@ -1,18 +1,28 @@
 pub(crate) mod parser {
     use rand::Rng;
     use std::collections::HashMap;
+    use std::panic;
 
     pub fn parse(args: &[String]) {
+
+/*        panic::set_hook(Box::new(|panic_info| {
+            if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+                println!("{:?}", s);
+            } else {
+                println!("panic occurred");
+            }
+        }));*/
+
         let split_args = prepare_args(args);
 
-        let mut tokens : Vec<Token> = parse_tokens(&split_args);
+        let mut tokens: Vec<Token> = parse_tokens(&split_args);
 
         roll(&mut tokens);
 
         transfer_notation(&mut tokens);
 
         let result = calculate(&mut tokens);
-        print!("Total: {}",result);
+        print!("Total: {}", result);
 
     }
 
@@ -24,14 +34,17 @@ pub(crate) mod parser {
                 joined_args.push_str(&entry);
             }
         }
-        joined_args = joined_args.replace(" ", "")
+        joined_args = joined_args.to_lowercase()
+            .replace(" ", "")
+            .replace("w", "d")
+            .replace("d%", "d100")
             .replace("+", " + ")
             .replace("-", " - ")
             .replace("*", " * ")
             .replace("/", " / ")
             .replace(")", " ) ")
-            .replace("(", " ( ")
-            .to_lowercase();
+            .replace("(", " ( ");
+
 
         let split: Vec<&str> = joined_args.as_str().split_whitespace().collect();
         let result: Vec<String> = split.iter().map(|s| s.to_string()).collect();
@@ -67,9 +80,21 @@ pub(crate) mod parser {
                             tokens.push(Token::Number(i))
                         },
                         Err(_e) => {
+
                             let split: Vec<&str> = entry.split("d").collect();
-                            let dice: (u64,u64) = (split[0].parse().unwrap_or(0),split[1].parse().unwrap_or(0));
-                            tokens.push(Token::Roll(dice))
+
+                            let _ = match split.len() == 2 {
+                                true => {
+                                    let dice: (u64, u64) = (split[0].parse().unwrap_or(0), split[1].parse().unwrap_or(0));
+                                    if dice.0 == 0 || dice.1 == 0 {
+                                        panic!("invalid dice!")
+                                    }
+                                    tokens.push(Token::Roll(dice))
+                                },
+                                false => {
+                                    panic!("can not parse argument {:?} !", entry)
+                                }
+                            };
                         }
                     };
                 }
@@ -113,7 +138,7 @@ pub(crate) mod parser {
                                 output.push(x);
                             }
                             None => {
-                                panic!()
+                                panic!("operation failed")
                             }
                         }
                     }
@@ -199,7 +224,7 @@ pub(crate) mod parser {
                 }
             }
             None => {
-                panic!();
+                panic!("invalid arguments!");
             }
         }
 
@@ -216,7 +241,7 @@ pub(crate) mod parser {
                 }
             }
             None => {
-                panic!();
+                panic!("missing numeric value!");
             }
         }
         panic!()
