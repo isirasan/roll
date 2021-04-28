@@ -20,7 +20,7 @@ Operator | Desc
  `-` | subtraction
  `*`  | multipication
  `/` | division (rounded mathematically)
- `(   ) | braces for calculation order
+ `(   )` | braces for calculation order
 
 ##Dice
 [n]d[m]-> n and m can be any numeric unsigned 64bit value greater then 0
