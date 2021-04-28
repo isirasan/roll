@@ -5,13 +5,13 @@ pub(crate) mod parser {
 
     pub fn parse(args: &[String]) {
 
-/*        panic::set_hook(Box::new(|panic_info| {
+        panic::set_hook(Box::new(|panic_info| {
             if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
                 println!("{:?}", s);
             } else {
                 println!("panic occurred");
             }
-        }));*/
+        }));
 
         let split_args = prepare_args(args);
 
