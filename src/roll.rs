@@ -5,13 +5,13 @@ pub(crate) mod parser {
 
     pub fn parse(args: &[String]) {
 
-        // panic::set_hook(Box::new(|panic_info| {
-        //     if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
-        //         println!("{:?}", s);
-        //     } else {
-        //         println!("panic occurred");
-        //     }
-        // }));
+        panic::set_hook(Box::new(|panic_info| {
+            if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+                println!("{:?}", s);
+            } else {
+                println!("panic occurred");
+            }
+        }));
 
         let split_args = prepare_args(args);
 
@@ -213,20 +213,20 @@ pub(crate) mod parser {
                         stack.push(Token::Number(left * right));
                     }
                     '/' => {
-                        let left = get_stack_number(&mut stack);
                         let right = get_stack_number(&mut stack);
+                        let left = get_stack_number(&mut stack);
                         let result =  ((left as f64) / (right as f64)).round() as i64;
                         stack.push(Token::Number(result));
                     }
                     'c' => {
-                        let left = get_stack_number(&mut stack);
                         let right = get_stack_number(&mut stack);
+                        let left = get_stack_number(&mut stack);
                         let result =  ((left as f64) / (right as f64)).ceil() as i64;
                         stack.push(Token::Number(result));
                     }
                     'f' => {
-                        let left = get_stack_number(&mut stack);
                         let right = get_stack_number(&mut stack);
+                        let left = get_stack_number(&mut stack);
                         let result =  ((left as f64) / (right as f64)).floor() as i64;
                         stack.push(Token::Number(result));
                     }
