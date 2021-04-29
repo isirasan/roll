@@ -16,11 +16,13 @@ mathematic operations and dice can be compined as you want.
 ##Operators
 Operator | Desc
 --- | --- 
-+ | addition
-- | subtraction
-* | multipication
-/ | division (rounded mathematically)
-(   ) | braces for calculation order
+`+` | addition
+`-` | subtraction
+`*` | multipication
+`/` | division (rounded mathematically)
+`c` | division (rceiled)
+`f` | division (floored)
+`(   )` | braces for calculation order
 
 ##Dice
 [n]d[m]-> n and m can be any numeric unsigned 64bit value greater then 0
