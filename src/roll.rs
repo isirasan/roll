@@ -3,7 +3,7 @@ pub(crate) mod parser {
     use std::collections::HashMap;
     use std::panic;
 
-    pub fn parse(args: &[String]) {
+    pub fn parse(args: &[String]) -> i64 {
 
         panic::set_hook(Box::new(|panic_info| {
             if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
@@ -19,12 +19,17 @@ pub(crate) mod parser {
 
         roll(&mut tokens);
 
+
+        fix_negative_numbers(&mut tokens);
+
         transfer_notation(&mut tokens);
 
         let result = calculate(&mut tokens);
-        print!("Total: {}", result);
 
+        return result;
     }
+
+
 
     fn prepare_args(args: &[String]) -> Vec<String> {
         let mut joined_args = "".to_string();
@@ -131,6 +136,42 @@ pub(crate) mod parser {
         }
     }
 
+    fn fix_negative_numbers(tokens: &mut Vec<Token>) {
+        let mut fixed_tokens:  Vec<Token> = Vec::new();
+        let mut last_token: &Token = &Token::BracesOpen;
+        let mut close_brace:bool = false;
+        let mut apply_fix:bool;
+        for (_, token) in tokens.iter().enumerate() {
+            if let Token::Operator('-') = token {
+                if let Token::Number(_) = last_token {
+                    apply_fix = false;
+                } else {
+                    apply_fix = true;
+                }
+            } else {
+                apply_fix = false;
+            }
+
+            if apply_fix {
+                fixed_tokens.push(Token::BracesOpen);
+                fixed_tokens.push(Token::Number(0));
+                fixed_tokens.push(*token);
+                close_brace = true;
+            } else {
+                fixed_tokens.push(*token);
+                if close_brace {
+                    fixed_tokens.push(Token::BracesClose);
+                    close_brace = false;
+                }
+            }
+
+            last_token = token;
+        }
+
+        *tokens = fixed_tokens;
+    }
+
+
     fn transfer_notation(tokens:&mut Vec<Token>) {
         let mut stack: Vec<Token> = Vec::new();
         let mut output: Vec<Token> = Vec::new();
@@ -140,7 +181,7 @@ pub(crate) mod parser {
                 output.push(*entry)
             } else if let Token::Operator(op) = entry {
                 while let Some(Token::Operator(c)) =  stack.first() {
-                    if compare_opertor_prevalenz(*op,*c) {
+                    if compare_operator_prevalence(*op, *c) {
                         let stack_element = stack.pop();
                         match stack_element {
                             Some(x) => {
@@ -198,18 +239,18 @@ pub(crate) mod parser {
             } else if let Token::Operator(op) = entry {
                 match op {
                     '+' => {
-                        let left = get_stack_number(&mut stack);
                         let right = get_stack_number(&mut stack);
+                        let left = get_stack_number(&mut stack);
                         stack.push(Token::Number(left + right));
                     }
                     '-' => {
-                        let left = get_stack_number(&mut stack);
                         let right = get_stack_number(&mut stack);
+                        let left = get_stack_number(&mut stack);
                         stack.push(Token::Number(left - right));
                     }
                     '*' => {
-                        let left = get_stack_number(&mut stack);
                         let right = get_stack_number(&mut stack);
+                        let left = get_stack_number(&mut stack);
                         stack.push(Token::Number(left * right));
                     }
                     '/' => {
@@ -268,7 +309,7 @@ pub(crate) mod parser {
         panic!()
     }
 
-    fn compare_opertor_prevalenz(a:char, b:char) -> bool {
+    fn compare_operator_prevalence(a:char, b:char) -> bool {
         let mut map : HashMap<char, u8> = HashMap::new();
         map.insert('+', 1);
         map.insert('-', 1);

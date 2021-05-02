@@ -6,5 +6,6 @@ use std::env;
 
 fn main() {
     let arguments: Vec<String> = env::args().collect();
-    roll::parser::parse(&arguments);
+    let result = roll::parser::parse(&arguments);
+    print!("Total: {}\n\n", result);
 }
