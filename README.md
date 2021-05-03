@@ -1,5 +1,10 @@
 # roll - commandline pen&paper dice roller
 
+## author
+isirasan
+
+@isirasan on twitter
+
 
 ##usage
 just add the dice you want to roll as arguments.
