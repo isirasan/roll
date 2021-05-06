@@ -6,11 +6,11 @@ isirasan
 @isirasan on twitter
 
 
-##usage
+## usage
 just add the dice you want to roll as arguments.
 mathematic operations and dice can be compined as you want.
 
-###Example
+### Example
 ```
 ./roll (2d6+3)*5
 ./roll 2d6+1d4+5d8
@@ -18,7 +18,7 @@ mathematic operations and dice can be compined as you want.
 ./roll 1d%*5+(21+1d6)+123d456
 ```
 
-##Operators
+## Operators
 Operator | Desc
 --- | --- 
 `+` | addition
@@ -29,12 +29,12 @@ Operator | Desc
 `f` | division (floored)
 `(   )` | braces for calculation order
 
-##Dice
-[n]d[m]-> n and m can be any numeric unsigned 64bit value greater then 0
+## Dice
+`[n]d[m]`-> n and m can be any numeric unsigned 64bit value greater then 0
 
-also works with [n]D[m], [n]w[m] and [n]W[m]
+also works with `[n]D[m]`, `[n]w[m]` and `[n]W[m]`
 
-
+`d[m]` will be prased as `1d[m]` and `1d%` is `1d100`
 
 
 
