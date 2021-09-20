@@ -44,6 +44,7 @@ pub(crate) mod roll {
             *joined_args = joined_args.to_lowercase()
                 .replace(" ", "")
                 .replace("w", "d")
+                .replace("^", "p")
                 .replace("d%", "d100")
                 .replace("+", " + ")
                 .replace("-", " - ")
@@ -53,6 +54,7 @@ pub(crate) mod roll {
                 .replace("f", " f ")
                 .replace(")", " ) ")
                 .replace("(", " ( ")
+                .replace("p", " p ")
                 .replace(" d", " 1d");
 
             let split: Vec<&str> = joined_args.as_str().split_whitespace().collect();
@@ -83,6 +85,9 @@ pub(crate) mod roll {
                     }
                     x if x == "f" => {
                         tokens.push(super::Token::Operator('f'))
+                    }
+                    x if x == "p" => {
+                        tokens.push(super::Token::Operator('p'))
                     }
                     x if x == "(" => {
                         tokens.push(super::Token::BracesOpen)
@@ -282,6 +287,12 @@ pub(crate) mod roll {
                             let result = ((left as f64) / (right as f64)).floor() as i64;
                             stack.push(super::Token::Number(result));
                         }
+                        'p' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            let result = ((left as f64).powi( right as i32)).round() as i64;
+                            stack.push(super::Token::Number(result));
+                        }
                         _ => {}
                     }
                 }
@@ -326,6 +337,7 @@ pub(crate) mod roll {
             map.insert('/', 2);
             map.insert('c', 2);
             map.insert('f', 2);
+            map.insert('p', 3);
             return map[&a] <= map[&b];
         }
     }
