@@ -23,10 +23,11 @@ Operator | Desc
 --- | --- 
 `+` | addition
 `-` | subtraction
-`*` | multipication
+`*` | multiplication
 `/` | division (rounded mathematically)
-`c` | division (rceiled)
+`c` | division (ceiled)
 `f` | division (floored)
+`p` or `^` | pow
 `(   )` | braces for calculation order
 
 ## Dice
