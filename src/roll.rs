@@ -1,6 +1,6 @@
 pub(crate) mod roll {
-    use std::panic;
     use rand::Rng;
+    use std::panic;
 
     use crate::roll::roll::input_parser::join_args;
 
@@ -40,22 +40,23 @@ pub(crate) mod roll {
             return joined_args;
         }
 
-    pub(super) fn prepare_args(joined_args: &mut String) -> Vec<String> {
-        *joined_args = joined_args.to_lowercase()
-            .replace(" ", "")
-            .replace("w", "d")
-            .replace("^", "p")
+        pub(super) fn prepare_args(joined_args: &mut String) -> Vec<String> {
+            *joined_args = joined_args
+                .to_lowercase()
+                .replace(" ", "")
+                .replace("w", "d")
+                .replace("^", "p")
                 .replace("d%", "d100")
-            .replace("+", " + ")
-            .replace("-", " - ")
-            .replace("*", " * ")
-            .replace("/", " / ")
-            .replace("c", " c ")
-            .replace("f", " f ")
-            .replace(")", " ) ")
-            .replace("(", " ( ")
+                .replace("+", " + ")
+                .replace("-", " - ")
+                .replace("*", " * ")
+                .replace("/", " / ")
+                .replace("c", " c ")
+                .replace("f", " f ")
+                .replace(")", " ) ")
+                .replace("(", " ( ")
                 .replace("p", " p ")
-            .replace(" d", " 1d");
+                .replace(" d", " 1d");
 
             let split: Vec<&str> = joined_args.as_str().split_whitespace().collect();
             let result: Vec<String> = split.iter().map(|s| s.to_string()).collect();
@@ -66,46 +67,29 @@ pub(crate) mod roll {
         pub(super) fn parse_tokens(args_list: &Vec<String>) -> Vec<super::Token> {
             let mut tokens: Vec<super::Token> = Vec::new();
 
-        for (_, entry) in args_list.iter().enumerate() {
-            match entry {
-                x if x == "+" => {
-                    tokens.push(super::Token::Operator('+'))
-                }
-                x if x == "-" => {
-                    tokens.push(super::Token::Operator('-'))
-                }
-                x if x == "*" => {
-                    tokens.push(super::Token::Operator('*'))
-                }
-                x if x == "/" => {
-                    tokens.push(super::Token::Operator('/'))
-                }
-                x if x == "c" => {
-                    tokens.push(super::Token::Operator('c'))
-                }
-                x if x == "f" => {
-                    tokens.push(super::Token::Operator('f'))
-                }
-                x if x == "p" => {
-                        tokens.push(super::Token::Operator('p'))
-                    }
-                    x if x == "(" => {
-                    tokens.push(super::Token::BracesOpen)
-                }
-                x if x == ")" => {
-                    tokens.push(super::Token::BracesClose)
-                }
-                _ => {
-                    match entry.parse::<i64>() {
-                        Ok(i) => {
-                            tokens.push(super::Token::Number(i))
-                        }
-                        Err(_) => {
-                            let split: Vec<&str> = entry.split("d").collect();
+            for (_, entry) in args_list.iter().enumerate() {
+                match entry {
+                    x if x == "+" => tokens.push(super::Token::Operator('+')),
+                    x if x == "-" => tokens.push(super::Token::Operator('-')),
+                    x if x == "*" => tokens.push(super::Token::Operator('*')),
+                    x if x == "/" => tokens.push(super::Token::Operator('/')),
+                    x if x == "c" => tokens.push(super::Token::Operator('c')),
+                    x if x == "f" => tokens.push(super::Token::Operator('f')),
+                    x if x == "p" => tokens.push(super::Token::Operator('p')),
+                    x if x == "(" => tokens.push(super::Token::BracesOpen),
+                    x if x == ")" => tokens.push(super::Token::BracesClose),
+                    _ => {
+                        match entry.parse::<i64>() {
+                            Ok(i) => tokens.push(super::Token::Number(i)),
+                            Err(_) => {
+                                let split: Vec<&str> = entry.split("d").collect();
 
                                 let _ = match split.len() == 2 {
                                     true => {
-                                        let mut dice: (u64, u64) = (split[0].parse().unwrap_or(0), split[1].parse().unwrap_or(0));
+                                        let mut dice: (u64, u64) = (
+                                            split[0].parse().unwrap_or(0),
+                                            split[1].parse().unwrap_or(0),
+                                        );
                                         if dice.0 == 0 {
                                             dice = (1, dice.1);
                                         } else if dice.1 == 0 {
@@ -177,7 +161,12 @@ pub(crate) mod roll {
                 }
 
                 let sum = rolls.iter().sum();
-                print!("{}: {:?}  = {}\n", format!("{}d{}", count.to_string(), dice_size.to_string()), rolls, sum);
+                print!(
+                    "{}: {:?}  = {}\n",
+                    format!("{}d{}", count.to_string(), dice_size.to_string()),
+                    rolls,
+                    sum
+                );
 
                 *entry = Token::Number(sum);
             }
@@ -249,48 +238,48 @@ pub(crate) mod roll {
         pub(super) fn calculate(tokens: &mut Vec<super::Token>) -> i64 {
             let mut stack: Vec<super::Token> = Vec::new();
 
-        for entry in &*tokens {
-            if let super::Token::Number(_) = entry {
-                stack.push(*entry)
-            } else if let super::Token::Operator(op) = entry {
-                match op {
-                    '+' => {
-                        let right = get_stack_number(&mut stack);
-                        let left = get_stack_number(&mut stack);
-                        stack.push(super::Token::Number(left + right));
-                    }
-                    '-' => {
-                        let right = get_stack_number(&mut stack);
-                        let left = get_stack_number(&mut stack);
-                        stack.push(super::Token::Number(left - right));
-                    }
-                    '*' => {
-                        let right = get_stack_number(&mut stack);
-                        let left = get_stack_number(&mut stack);
-                        stack.push(super::Token::Number(left * right));
-                    }
-                    '/' => {
-                        let right = get_stack_number(&mut stack);
-                        let left = get_stack_number(&mut stack);
-                        let result = ((left as f64) / (right as f64)).round() as i64;
-                        stack.push(super::Token::Number(result));
-                    }
-                    'c' => {
-                        let right = get_stack_number(&mut stack);
-                        let left = get_stack_number(&mut stack);
-                        let result = ((left as f64) / (right as f64)).ceil() as i64;
-                        stack.push(super::Token::Number(result));
-                    }
-                    'f' => {
-                        let right = get_stack_number(&mut stack);
-                        let left = get_stack_number(&mut stack);
-                        let result = ((left as f64) / (right as f64)).floor() as i64;
-                        stack.push(super::Token::Number(result));
-                    }
-                    'p' => {
+            for entry in &*tokens {
+                if let super::Token::Number(_) = entry {
+                    stack.push(*entry)
+                } else if let super::Token::Operator(op) = entry {
+                    match op {
+                        '+' => {
                             let right = get_stack_number(&mut stack);
                             let left = get_stack_number(&mut stack);
-                            let result = ((left as f64).powi( right as i32)).round() as i64;
+                            stack.push(super::Token::Number(left + right));
+                        }
+                        '-' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            stack.push(super::Token::Number(left - right));
+                        }
+                        '*' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            stack.push(super::Token::Number(left * right));
+                        }
+                        '/' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            let result = ((left as f64) / (right as f64)).round() as i64;
+                            stack.push(super::Token::Number(result));
+                        }
+                        'c' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            let result = ((left as f64) / (right as f64)).ceil() as i64;
+                            stack.push(super::Token::Number(result));
+                        }
+                        'f' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            let result = ((left as f64) / (right as f64)).floor() as i64;
+                            stack.push(super::Token::Number(result));
+                        }
+                        'p' => {
+                            let right = get_stack_number(&mut stack);
+                            let left = get_stack_number(&mut stack);
+                            let result = ((left as f64).powi(right as i32)).round() as i64;
                             stack.push(super::Token::Number(result));
                         }
                         _ => {}
@@ -329,15 +318,15 @@ pub(crate) mod roll {
             panic!("failed to get stack number")
         }
 
-    fn compare_operator_prevalence(a: char, b: char) -> bool {
-        let mut map: HashMap<char, u8> = HashMap::new();
-        map.insert('+', 1);
-        map.insert('-', 1);
-        map.insert('*', 2);
-        map.insert('/', 2);
-        map.insert('c', 2);
-        map.insert('f', 2);
-        map.insert('p', 3);
+        fn compare_operator_prevalence(a: char, b: char) -> bool {
+            let mut map: HashMap<char, u8> = HashMap::new();
+            map.insert('+', 1);
+            map.insert('-', 1);
+            map.insert('*', 2);
+            map.insert('/', 2);
+            map.insert('c', 2);
+            map.insert('f', 2);
+            map.insert('p', 3);
             return map[&a] <= map[&b];
         }
     }
